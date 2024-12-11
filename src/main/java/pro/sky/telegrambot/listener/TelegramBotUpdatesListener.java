@@ -20,6 +20,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.awt.SystemColor.text;
+
 @Service
 public class TelegramBotUpdatesListener implements UpdatesListener {
 
@@ -39,39 +41,36 @@ public class TelegramBotUpdatesListener implements UpdatesListener {
         telegramBot.setUpdatesListener(this);
     }
 
+
+
+
     @Override
     public int process(List<Update> updates) {
+
+
+
         updates.forEach(update -> {
             logger.info("Processing update: {}", update);
             for (Update uptade : updates) {
                 if (update.message() != null && update.message().text() != null) {
                     String messageText = update.message().text();
-                    long chatId = update.message().chat().id();
+                    Long chatId = update.message().chat().id();
                     String message = "ну шо ты лысый";
                     switch (messageText) {
                         case "/start" -> message = "Здарова отец! Чем помочь?";
                         case "stop" -> message = "не тормози меня по-братски";
-                        case "help" -> message = "а хуй тебе";
-                        case "hello" -> message = "я же здоровался";
-                        case "sos" -> message = "сос? это че";
-                        case "lol" -> message = "кек";
-                        case "kek" -> message = "чебурек";
                     }
                     Matcher matcher = pattern.matcher(messageText);
                     if(matcher.matches()) {
-                        System.out.println(matcher.group(0));
-                        System.out.println(matcher.group(1));
-                        System.out.println(matcher.group(2));
-                        System.out.println(matcher.group(3));
                         message = "хорошо!";
                         notificationTaskRepository.save(new NotificationTask(chatId,matcher.group(3), LocalDateTime.parse(matcher.group(1), botDateFormatter)));
                     }
-                    SendMessage sendMessage = new SendMessage(chatId, message);
-                    telegramBot.execute(sendMessage);
                 }
             }
         });
         return UpdatesListener.CONFIRMED_UPDATES_ALL;
     }
-
+    public void sendMessage(Long chatId, String messageText) {
+        telegramBot.execute(new SendMessage(chatId.toString(), messageText));
+    }
 }
